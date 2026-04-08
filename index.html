@@ -1037,12 +1037,22 @@ let reuniones=[];
 let members=[];
 
 /* ── AIRTABLE: función central ── */
-async function at(tabla,metodo,id,cuerpo){
-  const body={table:tabla,method:metodo||'GET'};
-  if(id) body.id=id;
-  if(cuerpo) body.body=cuerpo;
-  const res=await fetch('/.netlify/functions/airtable',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!res.ok) throw new Error('Error Airtable '+res.status);
+async function at(tabla, metodo, id, cuerpo) {
+  // Armamos el paquete exactamente como lo espera airtable.js
+  const body = { 
+    table: tabla, 
+    method: metodo || 'GET',
+    id: id,      // El ID para borrar o editar
+    body: cuerpo // Los datos para guardar
+  };
+  
+  const res = await fetch('/.netlify/functions/airtable', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) throw new Error('Error Airtable ' + res.status);
   return res.json();
 }
 
@@ -1100,7 +1110,7 @@ async function addReunion(){
   const btn=document.querySelector('[onclick="addReunion()"]');
   btn.textContent='Guardando…';btn.disabled=true;
   try{
-    await at('Reuniones','POST',null,{records:[{fields:{cat,date,time,place,candidatas:'[]'}}]});
+    await at('Reuniones', 'POST', null, { fields: { cat, date, time, place, candidatas: '[]' } });
     document.getElementById('nr-cat').value='';
     document.getElementById('nr-date').value='';
     document.getElementById('nr-place').value='';
@@ -1125,7 +1135,7 @@ async function addCand(rid){
   const r=reuniones.find(x=>x.id===rid);
   const nuevas=[...r.candidatas,{title:ti,proposer:pi}];
   try{
-    await at('Reuniones','PATCH',rid,{fields:{candidatas:JSON.stringify(nuevas)}});
+    await at('Reuniones', 'PATCH', rid, { fields: { candidatas: JSON.stringify(nuevas) } });
     document.getElementById('ct-'+rid).value='';
     await cargarTodo();
     activeR=rid;renderReuniones();
@@ -1135,7 +1145,7 @@ async function delCand(rid,i){
   const r=reuniones.find(x=>x.id===rid);
   const nuevas=r.candidatas.filter((_,idx)=>idx!==i);
   try{
-    await at('Reuniones','PATCH',rid,{fields:{candidatas:JSON.stringify(nuevas)}});
+    await at('Reuniones', 'PATCH', rid, { fields: { candidatas: JSON.stringify(nuevas) } });
     await cargarTodo();
     activeR=rid;renderReuniones();
   }catch(e){alert('No se pudo eliminar la candidata.');}
@@ -1335,7 +1345,7 @@ async function addMember(){
   const btn=document.querySelector('[onclick="addMember()"]');
   btn.textContent='Guardando…';btn.disabled=true;
   try{
-    await at('Miembros','POST',null,{records:[{fields:{name,lb}}]});
+    await at('Miembros', 'POST', null, { fields: { name, lb } });
     document.getElementById('m-name').value='';
     document.getElementById('m-lb').value='';
     await cargarTodo();
