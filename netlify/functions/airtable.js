@@ -53,6 +53,7 @@ exports.handler = async (event) => {
   try {
     const response = await fetch(url, fetchOptions);
     const data = await response.json();
+    console.log("MENSAJE DE AIRTABLE:", JSON.stringify(data));
     return {
       statusCode: response.status,
       headers: { 'Content-Type': 'application/json' },
