@@ -1,19 +1,26 @@
 const https = require('https');
 
 exports.handler = async (event) => {
+    // Configuración de seguridad para que el navegador no bloquee la conexión
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
     };
 
-    if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+    // Responder a la verificación del navegador
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 200, headers, body: '' };
+    }
 
     try {
-        const { table, method, id, body } = JSON.parse(event.body);
+        const parsedBody = JSON.parse(event.body || '{}');
+        const { table, method, id, body } = parsedBody;
+        
         const TOKEN = process.env.AIRTABLE_TOKEN;
         const BASE_ID = process.env.AIRTABLE_BASE_ID;
 
+        // Construcción de la ruta hacia Airtable
         const path = `/v0/${BASE_ID}/${table}${id ? `/${id}` : ''}`;
         
         return new Promise((resolve, reject) => {
@@ -28,22 +35,36 @@ exports.handler = async (event) => {
             };
 
             const req = https.request(options, (res) => {
-                let data = '';
-                res.on('data', (chunk) => data += chunk);
+                let responseData = '';
+                res.on('data', (chunk) => responseData += chunk);
                 res.on('end', () => {
                     resolve({
                         statusCode: res.statusCode,
                         headers,
-                        body: data
+                        body: responseData
                     });
                 });
             });
 
-            req.on('error', (e) => reject({ statusCode: 500, headers, body: e.message }));
-            if (body) req.write(JSON.stringify(body));
+            req.on('error', (e) => {
+                resolve({ 
+                    statusCode: 500, 
+                    headers, 
+                    body: JSON.stringify({ error: 'Error de red', detail: e.message }) 
+                });
+            });
+
+            if (body) {
+                req.write(JSON.stringify(body));
+            }
             req.end();
         });
+
     } catch (err) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+        return { 
+            statusCode: 500, 
+            headers, 
+            body: JSON.stringify({ error: 'Error interno', detail: err.message }) 
+        };
     }
 };
