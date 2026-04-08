@@ -70,9 +70,8 @@ exports.handler = async (event) => {
       body: JSON.stringify(data),
     };
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Error al contactar Airtable', detail: err.message }),
+   return {
+      statusCode: response.status,
+      headers: headers, // <--- Agregá esto aquí también
+      body: JSON.stringify(data),
     };
-  }
-};
