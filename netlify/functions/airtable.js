@@ -1,11 +1,21 @@
-// Netlify Function: proxy seguro hacia Airtable
-// Ubicación en tu proyecto: netlify/functions/airtable.js
-
 exports.handler = async (event) => {
-  // Solo aceptar POST
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  // CONFIGURACIÓN DE SEGURIDAD (CORS)
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  };
+
+  // Responder a la verificación del navegador
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
   }
+
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers, body: 'Method Not Allowed' };
+  }
+  
+  // ... (el resto del código que ya tenías abajo)
 
   // Leer credenciales desde variables de entorno (configuradas en Netlify)
   const TOKEN   = process.env.AIRTABLE_TOKEN;
