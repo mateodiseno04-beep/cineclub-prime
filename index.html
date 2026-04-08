@@ -1046,7 +1046,7 @@ async function at(tabla, metodo, id, cuerpo) {
   };
   
   // Cambiá la URL a esta versión que es la más compatible:
-  const res = await fetch('https://nimble-sable-fa3ff5.netlify.app/.netlify/functions/airtable', { 
+  const res = await fetch('./.netlify/functions/airtable', { // Agregamos un punto adelante del / 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
