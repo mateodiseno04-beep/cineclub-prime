@@ -1038,15 +1038,15 @@ let members=[];
 
 /* ── AIRTABLE: función central ── */
 async function at(tabla, metodo, id, cuerpo) {
-  // Armamos el paquete exactamente como lo espera airtable.js
   const body = { 
     table: tabla, 
     method: metodo || 'GET',
-    id: id,      // El ID para borrar o editar
-    body: cuerpo // Los datos para guardar
+    id: id,      
+    body: cuerpo 
   };
   
-  const res = await fetch('/.netlify/functions/airtable', {
+  // Cambiá la URL a esta versión que es la más compatible:
+  const res = await fetch('/.netlify/functions/airtable', { 
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
